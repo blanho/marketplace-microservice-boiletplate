@@ -1,0 +1,157 @@
+services:
+
+  # ── Databases ────────────────────────────────────────────────────────────────
+
+  catalog.db:
+    image: postgres:17-alpine
+    container_name: catalog.db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-marketplace_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-marketplace_password}
+      POSTGRES_DB: ${POSTGRES_DB:-catalog_db}
+    volumes:
+      - catalog_db:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-marketplace_user} -d ${POSTGRES_DB:-catalog_db}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - marketplace
+    restart: unless-stopped
+
+  basket.db:
+    image: postgres:17-alpine
+    container_name: basket.db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-marketplace_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-marketplace_password}
+      POSTGRES_DB: ${BASKET_DB:-basket_db}
+    volumes:
+      - basket_db:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-marketplace_user} -d ${BASKET_DB:-basket_db}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - marketplace
+    restart: unless-stopped
+
+  basket.cache:
+    image: redis:7-alpine
+    container_name: basket.cache
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - marketplace
+    restart: unless-stopped
+
+  discount.db:
+    image: postgres:17-alpine
+    container_name: discount.db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-marketplace_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-marketplace_password}
+      POSTGRES_DB: ${DISCOUNT_DB:-discount_db}
+    volumes:
+      - discount_db:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-marketplace_user} -d ${DISCOUNT_DB:-discount_db}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - marketplace
+    restart: unless-stopped
+
+  order.db:
+    image: postgres:17-alpine
+    container_name: order.db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-marketplace_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-marketplace_password}
+      POSTGRES_DB: ${ORDER_DB:-order_db}
+    volumes:
+      - order_db:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-marketplace_user} -d ${ORDER_DB:-order_db}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - marketplace
+    restart: unless-stopped
+
+  # ── Message Broker ──────────────────────────────────────────────────────────
+
+  messagebroker:
+    image: rabbitmq:4-management-alpine
+    container_name: messagebroker
+    hostname: marketplace-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "-q", "check_running" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - marketplace
+    restart: unless-stopped
+
+  # ── Observability ───────────────────────────────────────────────────────────
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.62
+    container_name: jaeger
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:14269/" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - marketplace
+    restart: unless-stopped
+
+  seq:
+    image: datalust/seq:2024.4
+    container_name: seq
+    environment:
+      ACCEPT_EULA: "Y"
+    networks:
+      - marketplace
+    restart: unless-stopped
+
+# ── Networks ───────────────────────────────────────────────────────────────────
+
+networks:
+  marketplace:
+    name: marketplace
+    driver: bridge
+
+# ── Volumes ────────────────────────────────────────────────────────────────────
+
+volumes:
+  catalog_db:
+    name: marketplace_catalog_db
+  basket_db:
+    name: marketplace_basket_db
+  discount_db:
+    name: marketplace_discount_db
+  order_db:
+    name: marketplace_order_db
+
+

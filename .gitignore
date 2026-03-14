@@ -1,0 +1,67 @@
+## ─── Build outputs ───────────────────────────────────────────────────────────
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+build/
+publish/
+out/
+
+## ─── .NET artifacts ─────────────────────────────────────────────────────────
+*.dll
+*.exe
+*.pdb
+*.cache
+*.nupkg
+*.snupkg
+**/packages/
+**/project.lock.json
+**/project.fragment.lock.json
+
+## ─── IDE / Editor ───────────────────────────────────────────────────────────
+.vs/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.swp
+*~
+
+## ─── OS files ───────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+## ─── Environment & secrets ──────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+appsettings.*.local.json
+**/Properties/launchSettings.secret.json
+
+## ─── Logs ───────────────────────────────────────────────────────────────────
+logs/
+*.log
+
+## ─── Docker ─────────────────────────────────────────────────────────────────
+docker-compose.override.local.yml
+
+## ─── EF Core migrations snapshot (keep migrations, ignore snapshots if regenerated)
+# **/Migrations/*.Designer.cs
+
+## ─── Test results ───────────────────────────────────────────────────────────
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+*.trx
+

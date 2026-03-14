@@ -1,0 +1,66 @@
+# docker-compose.override.yml — development-only extras
+# Automatically merged with docker-compose.yml by Docker Compose CLI.
+# Never use in production.
+
+services:
+
+  # Expose Postgres ports so local tools (DataGrip, DBeaver, psql) can connect
+  catalog.db:
+    ports:
+      - "5432:5432"
+
+  basket.db:
+    ports:
+      - "5433:5432"
+
+  basket.cache:
+    ports:
+      - "6379:6379"
+
+  discount.db:
+    ports:
+      - "5434:5432"
+
+  order.db:
+    ports:
+      - "5435:5432"
+
+  # ── Message Broker ──────────────────────────────────────────────────────────
+  messagebroker:
+    ports:
+      - "5672:5672"     # AMQP
+      - "15672:15672"   # Management UI
+
+  # ── Observability ───────────────────────────────────────────────────────────
+  jaeger:
+    ports:
+      - "4317:4317"     # OTLP gRPC
+      - "4318:4318"     # OTLP HTTP
+      - "16686:16686"   # Jaeger UI
+
+  seq:
+    ports:
+      - "8081:80"       # Seq UI
+
+  # ── Dev Tools ───────────────────────────────────────────────────────────────
+  pgadmin:
+    image: dpage/pgadmin4:8
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@marketplace.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: "False"   # single-user mode, no login prompt
+    ports:
+      - "5050:80"
+    depends_on:
+      - catalog.db
+    networks:
+      - marketplace
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    restart: unless-stopped
+
+volumes:
+  pgadmin_data:
+    name: marketplace_pgadmin_data
+
